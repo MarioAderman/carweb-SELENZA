@@ -1,0 +1,16 @@
+{
+  "files": [],
+  "compilerOptions": {
+    // ... other options (target, lib, jsx, module, moduleResolution etc.)
+    "baseUrl": ".", // This allows absolute imports from the src directory
+    "paths": {
+      "@/*": ["src/*"] // Allows imports like import Button from '@/components/ui/Button'
+    },
+    // ... other options (allowSyntheticDefaultImports, strict, etc.)
+  },
+  "include": ["src"],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}
