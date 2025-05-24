@@ -1,25 +1,45 @@
 // frontend/src/App.tsx
-import { Routes, Route } from 'react-router-dom'
-// Import your page components here once you create them
-// import HomePage from './pages/HomePage'
-// import InventoryPage from './pages/InventoryPage'
-// import LandingSurveyPage from './pages/LandingSurveyPage'
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useSurveyContext } from './contexts/SurveyContext';
+
+import LandingSurveyPage from './pages/LandingSurveyPage';
+import HomePage from './pages/HomePage';
+import InventoryPage from './pages/InventoryPage';
+import SellCarPage from './pages/SellCarPage';
+import AboutUsPage from './pages/AboutUsPage';
+import ServicesPage from './pages/ServicesPage';
+import VehicleDetailPage from './pages/VehicleDetailPage';
+import NotFoundPage from './pages/NotFoundPage';
+
+import PageLayout from './components/layout/PageLayout';
+
+// Access the environment variable
+const landingSurveyEnabled = import.meta.env.VITE_LANDING_SURVEY_ENABLED === 'true';
 
 function App() {
-  // For now, a simple placeholder. We'll add routes later.
+  const { hasCompletedSurvey } = useSurveyContext();
+  const showSurvey = landingSurveyEnabled && !hasCompletedSurvey;
+
   return (
-    <div className="min-h-screen bg-selenza-black text-selenza-white"> {/* Example global styling */}
-      <h1 className="text-3xl font-bold text-selenza-bright-red p-4">Welcome to SELENZA Frontend!</h1>
-      {/*
-      <Routes>
-        <Route path="/" element={<LandingSurveyPage />} /> // Or directly to HomePage if survey is handled differently
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/inventory" element={<InventoryPage />} />
-        // ... other routes
-      </Routes>
-      */}
-    </div>
-  )
+    <Routes>
+      {showSurvey && (
+        <Route path="/*" element={<LandingSurveyPage />} />
+      )}
+
+      {!showSurvey && (
+        <>
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/home" element={<PageLayout><HomePage /></PageLayout>} />
+          <Route path="/inventory" element={<PageLayout><InventoryPage /></PageLayout>} />
+          <Route path="/inventory/:vehicleId" element={<PageLayout><VehicleDetailPage /></PageLayout>} />
+          <Route path="/sell-car" element={<PageLayout><SellCarPage /></PageLayout>} />
+          <Route path="/services" element={<PageLayout><ServicesPage /></PageLayout>} />
+          <Route path="/about-us" element={<PageLayout><AboutUsPage /></PageLayout>} />
+          <Route path="*" element={<PageLayout><NotFoundPage /></PageLayout>} />
+        </>
+      )}
+    </Routes>
+  );
 }
 
-export default App
+export default App;
