@@ -8,6 +8,8 @@ export interface VehicleFilters {
   maxYear?: number | string;
   minPrice?: number | string;
   maxPrice?: number | string;
+  status?: 'available' | 'sold' | 'pending' | string;
+  limit?: number;
   // Add more filters as needed: mileage, fuel_type, transmission, etc.
 }
 
