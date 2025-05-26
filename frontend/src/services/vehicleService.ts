@@ -1,9 +1,10 @@
 // frontend/src/services/vehicleService.ts
 import apiClient from './apiClient';
-import type { Vehicle } from '../types/vehicle.types'; // Assuming VehiclesApiResponse is not used for a simple list
+import type { Vehicle } from '../types/vehicles.types';
+import type { VehicleFilters } from '../components/vehicle/VehicleFilterControls';
 
 // If your API returns a simple array of vehicles:
-export const getVehicles = async (filters?: Record<string, any>): Promise<Vehicle[]> => {
+export const getVehicles = async (filters?: VehicleFilters): Promise<Vehicle[]> => {
   try {
     // If you implement filtering later, you can pass params here
     const response = await apiClient.get<Vehicle[]>('/vehicles', { params: filters });
