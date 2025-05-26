@@ -1,7 +1,7 @@
 // frontend/src/pages/InventoryPage.tsx
 import React, { useEffect, useState } from 'react';
 import { getVehicles } from '../services/vehicleService';
-import type { Vehicle } from '../types/vehicle.types';
+import type { Vehicle } from '../types/vehicles.types';
 import VehicleCard from '../components/vehicle/VehicleCard';
 // import VehicleFilterControls from '../../components/vehicle/VehicleFilterControls'; // For later
 

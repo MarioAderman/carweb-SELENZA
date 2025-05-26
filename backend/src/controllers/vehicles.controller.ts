@@ -8,12 +8,35 @@ export const getAllVehicles = async (_req: Request, res: Response): Promise<void
 
 export const getVehicleById = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  const result = await pool.query('SELECT * FROM dealership.vehicles WHERE id = $1', [id]);
-  if (result.rows.length === 0) {
-    res.status(404).json({ message: 'Vehículo no encontrado' });
-    return;
+  try {
+    // Fetch vehicle details
+    const vehicleResult = await pool.query(
+      'SELECT * FROM dealership.vehicles WHERE id = $1',
+      [id]
+    );
+
+    if (vehicleResult.rows.length === 0) {
+      res.status(404).json({ message: 'Vehicle not found' });
+      return
+    }
+
+    const vehicle = vehicleResult.rows[0];
+
+    // Fetch vehicle images
+    const imagesResult = await pool.query(
+      'SELECT id, url, sort_order FROM dealership.vehicle_images WHERE vehicle_id = $1 ORDER BY sort_order ASC, id ASC',
+      [id]
+    );
+
+    // Add images to the vehicle object
+    vehicle.images = imagesResult.rows;
+
+    res.json(vehicle);
+  } catch (error) {
+    console.error('Error fetching vehicle by ID:', error);
+    const e = error as Error;
+    res.status(500).json({ message: 'Error fetching vehicle data', error: e.message });
   }
-  res.json(result.rows[0]);
 };
 
 export const createVehicle = async (req: Request, res: Response): Promise<void> => {
