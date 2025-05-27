@@ -1,4 +1,3 @@
-// frontend/src/App.tsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSurveyContext } from './contexts/SurveyContext';
 
