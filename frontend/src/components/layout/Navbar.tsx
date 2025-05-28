@@ -1,7 +1,7 @@
 // frontend/src/components/layout/Navbar.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import SelenzaLogo from '../../assets/images/selenza-logo.jpg';
+import SelenzaLogo from '../../assets/images/selenza-logo.png';
 
 const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
