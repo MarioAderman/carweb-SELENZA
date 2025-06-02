@@ -14,7 +14,7 @@ export const uploadVehicleImages = multer({
   storage: multerS3({
     s3,
     bucket: BUCKET_NAME,
-    acl: 'public-read',
+    // acl: 'public-read',
     contentType: multerS3.AUTO_CONTENT_TYPE,
     key: (req: UploadRequest, file, cb) => { // req should be of type UploadRequest
       // Ensure model and vehicleId are present in params

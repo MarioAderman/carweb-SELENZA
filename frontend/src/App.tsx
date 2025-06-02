@@ -9,6 +9,7 @@ import AboutUsPage from './pages/AboutUsPage';
 import ServicesPage from './pages/ServicesPage';
 import VehicleDetailPage from './pages/VehicleDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
+import VehicleAdminPage from './pages/VehicleAdminPage';
 
 import PageLayout from './components/layout/PageLayout';
 
@@ -34,6 +35,7 @@ function App() {
           <Route path="/sell-car" element={<PageLayout><SellCarPage /></PageLayout>} />
           <Route path="/services" element={<PageLayout><ServicesPage /></PageLayout>} />
           <Route path="/about-us" element={<PageLayout><AboutUsPage /></PageLayout>} />
+          <Route path="/admin/vehicle" element={<VehicleAdminPage />} />
           <Route path="*" element={<PageLayout><NotFoundPage /></PageLayout>} />
         </>
       )}
