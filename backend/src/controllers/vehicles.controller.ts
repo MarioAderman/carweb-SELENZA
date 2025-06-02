@@ -24,7 +24,7 @@ export const getVehicleById = async (req: Request, res: Response): Promise<void>
 
     // Fetch vehicle images
     const imagesResult = await pool.query(
-      'SELECT id, url, sort_order FROM dealership.vehicle_images WHERE vehicle_id = $1 ORDER BY sort_order ASC, id ASC',
+      'SELECT id, image_url, sort_order FROM dealership.vehicle_images WHERE vehicle_id = $1 ORDER BY sort_order ASC, id ASC',
       [id]
     );
 

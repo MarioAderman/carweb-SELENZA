@@ -80,7 +80,7 @@ const VehicleDetailPage: React.FC = () => {
     );
   }
 
-  const mainImageUrl = selectedImage?.url || (vehicle.images && vehicle.images.length > 0 ? vehicle.images[0].url : PlaceholderCarImage);
+  const mainImageUrl = selectedImage?.image_url || (vehicle.images && vehicle.images.length > 0 ? vehicle.images[0].image_url : PlaceholderCarImage);
 
   return (
     <div className="container mx-auto px-4 py-8 text-selenza-white">
@@ -112,7 +112,7 @@ const VehicleDetailPage: React.FC = () => {
                     ${selectedImage?.id === img.id ? 'border-selenza-bright-red' : 'border-transparent hover:border-selenza-cool-gray'}`}
                 >
                   <img
-                    src={img.url}
+                    src={img.image_url}
                     alt={`${vehicle.brand} ${vehicle.model} - Miniatura ${img.id}`}
                     className="w-full h-20 object-cover"
                     onError={(e) => (e.currentTarget.src = PlaceholderCarImage)}
