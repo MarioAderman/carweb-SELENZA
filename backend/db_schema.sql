@@ -172,9 +172,14 @@ ALTER SEQUENCE dealership.survey_sources_id_seq OWNED BY dealership.survey_sourc
 
 CREATE TABLE dealership.vehicle_images (
     id integer NOT NULL,
-    vehicle_id integer,
-    url text NOT NULL,
-    sort_order integer DEFAULT 0
+    vehicle_id integer NOT NULL,
+    image_url text NOT NULL,
+    sort_order integer DEFAULT 0,
+    s3_key text NOT NULL,
+    mime_type character varying(100),
+    original_filename character varying(255),
+    is_primary boolean DEFAULT false,
+    uploaded_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -324,7 +329,7 @@ COPY dealership.survey_sources (id, name) FROM stdin;
 -- Data for Name: vehicle_images; Type: TABLE DATA; Schema: dealership; Owner: carweb_user
 --
 
-COPY dealership.vehicle_images (id, vehicle_id, url, sort_order) FROM stdin;
+COPY dealership.vehicle_images (id, vehicle_id, image_url, sort_order, s3_key, mime_type, original_filename, is_primary, uploaded_at) FROM stdin;
 \.
 
 
@@ -415,6 +420,14 @@ ALTER TABLE ONLY dealership.survey_sources
 
 
 --
+-- Name: vehicle_images uq_vehicle_images_s3_key; Type: CONSTRAINT; Schema: dealership; Owner: carweb_user
+--
+
+ALTER TABLE ONLY dealership.vehicle_images
+    ADD CONSTRAINT uq_vehicle_images_s3_key UNIQUE (s3_key);
+
+
+--
 -- Name: vehicle_images vehicle_images_pkey; Type: CONSTRAINT; Schema: dealership; Owner: carweb_user
 --
 
@@ -445,10 +458,24 @@ CREATE INDEX idx_survey_session ON dealership.survey_responses USING btree (sess
 
 
 --
+-- Name: idx_vehicle_images_vehicle_id; Type: INDEX; Schema: dealership; Owner: carweb_user
+--
+
+CREATE INDEX idx_vehicle_images_vehicle_id ON dealership.vehicle_images USING btree (vehicle_id);
+
+
+--
 -- Name: idx_vehicles_status; Type: INDEX; Schema: dealership; Owner: carweb_user
 --
 
 CREATE INDEX idx_vehicles_status ON dealership.vehicles USING btree (status);
+
+
+--
+-- Name: uq_vehicle_primary_image; Type: INDEX; Schema: dealership; Owner: carweb_user
+--
+
+CREATE UNIQUE INDEX uq_vehicle_primary_image ON dealership.vehicle_images USING btree (vehicle_id, is_primary) WHERE (is_primary = true);
 
 
 --
@@ -464,14 +491,6 @@ CREATE TRIGGER trg_update_vehicle_timestamp BEFORE UPDATE ON dealership.vehicles
 
 ALTER TABLE ONLY dealership.analytics_events
     ADD CONSTRAINT analytics_events_session_id_fkey FOREIGN KEY (session_id) REFERENCES dealership.sessions(session_id) ON DELETE CASCADE;
-
-
---
--- Name: survey_responses fk_source_id; Type: FK CONSTRAINT; Schema: dealership; Owner: carweb_user
---
-
-ALTER TABLE ONLY dealership.survey_responses
-    ADD CONSTRAINT fk_source_id FOREIGN KEY (source_id) REFERENCES dealership.survey_sources(id) ON DELETE SET NULL;
 
 
 --
