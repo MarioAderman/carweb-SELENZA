@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { pool } from '../db';
 import { s3 } from '../lib/s3';
+import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 import type { UploadRequest } from '../types/express';
 
 interface S3File extends Express.Multer.File {
@@ -12,6 +13,10 @@ interface S3File extends Express.Multer.File {
   // etag?: string;
   // serverSideEncryption?: string;
   // metadata?: any;
+}
+
+interface DeleteImageParams {
+  imageId: string;
 }
 
 export const getVehicleImages = async (req: Request, res: Response): Promise<void> => {
@@ -35,12 +40,14 @@ export const addImageToVehicle = async (req: UploadRequest, res: Response): Prom
   const files = req.files as S3File[] | undefined; // Cast to S3File array
 
   if (!files || files.length === 0) {
-    return res.status(400).json({ message: 'No files uploaded.' });
+    res.status(400).json({ message: 'No files uploaded.' });
+    return;
   }
 
   if (!vehicleId) {
     // This check might be redundant if your route structure guarantees vehicleId
-    return res.status(400).json({ message: 'Vehicle ID is missing.' });
+    res.status(400).json({ message: 'Vehicle ID is missing.' });
+    return;
   }
 
   const client = await pool.connect(); // Get a client from the pool for transaction
@@ -84,7 +91,8 @@ export const addImageToVehicle = async (req: UploadRequest, res: Response): Prom
     if (insertedImagesMetadata.length === 0 && files.length > 0) {
         // This means all files had issues (e.g. missing location/key)
         await client.query('ROLLBACK'); // Rollback transaction
-        return res.status(500).json({ message: 'Error processing uploaded files. S3 location/key missing for all files.' });
+        res.status(500).json({ message: 'Error processing uploaded files. S3 location/key missing for all files.' });
+        return;
     }
     
     await client.query('COMMIT'); // Commit transaction
@@ -104,16 +112,18 @@ export const addImageToVehicle = async (req: UploadRequest, res: Response): Prom
   }
 };
 
-export const deleteImage = async (req: UploadRequest, res: Response): Promise<void> => {
+export const deleteImage = async (req: Request<DeleteImageParams>, res: Response): Promise<void> => {
   const { imageId } = req.params;
   const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
   if (!imageId) {
-    return res.status(400).json({ message: 'Image ID is required.' });
+    res.status(400).json({ message: 'Image ID is required.' });
+    return;
   }
   if (!BUCKET_NAME) {
     console.error('AWS_BUCKET_NAME environment variable is not set.');
-    return res.status(500).json({ message: 'Server configuration error for S3 bucket.' });
+    res.status(500).json({ message: 'Server configuration error for S3 bucket.' });
+    return;
   }
 
   const client = await pool.connect();
@@ -129,17 +139,18 @@ export const deleteImage = async (req: UploadRequest, res: Response): Promise<vo
 
     if (imageResult.rows.length === 0) {
       await client.query('ROLLBACK');
-      return res.status(404).json({ message: 'Image not found in database.' });
+      res.status(404).json({ message: 'Image not found in database.' });
+      return;
     }
     const s3Key = imageResult.rows[0].s3_key;
 
     // 2. Delete from S3
     if (s3Key) { // Only attempt S3 delete if s3_key exists
         try {
-            await s3.deleteObject({
-                Bucket: BUCKET_NAME,
-                Key: s3Key,
-            }).promise();
+          await s3.send(new DeleteObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: s3Key,
+          }));
         } catch (s3Error) {
             // Log S3 deletion error but proceed to delete from DB if desired,
             // or rollback if S3 deletion is critical.
@@ -162,7 +173,8 @@ export const deleteImage = async (req: UploadRequest, res: Response): Promise<vo
     if (deleteDbResult.rowCount === 0) {
         // This case should ideally be caught by the earlier check, but as a safeguard
         await client.query('ROLLBACK');
-        return res.status(404).json({ message: 'Image not found in database for deletion (race condition or unexpected state).' });
+        res.status(404).json({ message: 'Image not found in database for deletion (race condition or unexpected state).' });
+        return;
     }
 
     await client.query('COMMIT');
