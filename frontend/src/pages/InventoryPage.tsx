@@ -67,23 +67,22 @@ const InventoryPage: React.FC = () => {
   };
 
   if (loading && vehicles.length === 0) { // Show loading only on initial load
-    return <PageLayout><div className="text-center py-10">Loading vehicles...</div></PageLayout>;
+    return <div className="text-center py-10">Cargando vehículos...</div>;
   }
 
   if (error) {
-    return <PageLayout><div className="text-center py-10 text-red-500">{error}</div></PageLayout>;
+    return <div className="text-center py-10 text-red-500">{error}</div>;
   }
 
   return (
-    <PageLayout>
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">Our Inventory</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">Nuesto Inventario</h1>
         
         {/* Placeholder for Filters UI - You would update activeFilters state from here */}
         {/* <div className="mb-8 p-4 bg-gray-100 rounded-lg"> ... </div> */}
 
         {vehicles.length === 0 && !loading && (
-          <div className="text-center py-10">No vehicles found matching your criteria.</div>
+          <div className="text-center py-10">No hay vehículos disponibles.</div>
         )}
 
         {vehicles.length > 0 && (
@@ -117,7 +116,6 @@ const InventoryPage: React.FC = () => {
           </div>
         )}
       </div>
-    </PageLayout>
   );
 };
 
