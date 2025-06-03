@@ -1,10 +1,11 @@
-// frontend/src/types/vehicle.types.ts
-
 export interface VehicleImage {
-    id: number;
-    vehicle_id: number;
-    url: string;
-    sort_order: number;
+    image_id: number;
+    image_url: string;
+    s3_key: string;
+    s3_bucket: string;
+    alt_text?: string | null;
+    is_primary?: boolean;
+    uploaded_at: string;
   }
   
   export interface Vehicle {
@@ -20,14 +21,26 @@ export interface VehicleImage {
     status: string; // e.g., 'available', 'sold'
     created_at: string; // Date string
     updated_at: string; // Date string
+    main_image_url?: string | null;
     images?: VehicleImage[]; // Optional: if you fetch images along with vehicles
   }
+
+  export interface VehicleFilters {
+    status?: string;
+    brand?: string;
+    model?: string;
+    year_min?: number;
+    year_max?: number;
+    price_min?: number;
+    price_max?: number;
+    // Add other potential filters
+    limit?: number;   // <-- Add limit
+    offset?: number;  // <-- Add offset
+  }
   
-  // For a list response, if your API wraps it
-  export interface VehiclesApiResponse {
-    data: Vehicle[];
-    // Add pagination info here if your API supports it
-    // total?: number;
-    // page?: number;
-    // limit?: number;
+  export interface PaginatedVehiclesResponse {
+    vehicles: Vehicle[];
+    totalVehicles: number;
+    currentPage: number;
+    totalPages: number;
   }

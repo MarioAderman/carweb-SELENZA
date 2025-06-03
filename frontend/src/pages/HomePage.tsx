@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Vehicle } from '../types/vehicles.types';
-import { getVehicles } from '../services/vehicleService'; // To fetch featured vehicles
+import { getAllVehicles } from '../services/vehicleService'; // To fetch featured vehicles
 import VehicleCard from '../components/vehicle/VehicleCard'; // Re-use for featured vehicles
 
 const heroBackgroundImageUrl = '../assets/images/selenza-logo.jpg';
@@ -14,13 +14,19 @@ const HomePage: React.FC = () => {
     const fetchFeatured = async () => {
       setIsLoadingFeatured(true);
       try {
-        // Fetch a few vehicles to feature, e.g., the first 4 available
-        // Later, you might have a specific endpoint or query param for "featured"
-        const allVehicles = await getVehicles({ status: 'available', limit: 4 }); // Assuming backend supports limit
-        setFeaturedVehicles(allVehicles);
+        // Correctly call getAllVehicles and extract the vehicles array
+        // The first argument is filters (Omit<VehicleFilters, 'limit' | 'offset'>)
+        // The second argument is limit
+        // The third argument is offset (defaults to 0 if not provided)
+        const response = await getAllVehicles(
+          { status: 'available' }, // Filters
+          4,                        // Limit
+          0                         // Offset
+        );
+        setFeaturedVehicles(response.vehicles); // Access the .vehicles array from the response
       } catch (error) {
         console.error("Error fetching featured vehicles:", error);
-        // Gracefully handle error, maybe show nothing or a message
+        setFeaturedVehicles([]); // Clear or handle error state appropriately
       } finally {
         setIsLoadingFeatured(false);
       }

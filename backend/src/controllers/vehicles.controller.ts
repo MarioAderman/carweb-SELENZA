@@ -1,9 +1,74 @@
 import { Request, Response } from 'express';
 import { pool } from '../db';
 
-export const getAllVehicles = async (_req: Request, res: Response): Promise<void> => {
-  const result = await pool.query(`SELECT * FROM dealership.vehicles WHERE status = 'available' ORDER BY created_at DESC`);
-  res.json(result.rows);
+export const getAllVehicles = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      limit = 12, // Default limit for how many vehicles to fetch
+      offset = 0,
+      // Add other potential filter query params here if needed in the future
+      // brand, model, year_min, year_max, price_min, price_max
+    } = req.query;
+
+    // Basic validation for limit and offset
+    const numLimit = parseInt(limit as string, 10);
+    const numOffset = parseInt(offset as string, 10);
+
+    if (isNaN(numLimit) || isNaN(numOffset) || numLimit <= 0 || numOffset < 0) {
+      res.status(400).json({ message: 'Invalid limit or offset parameters.' });
+      return;
+    }
+
+    // For now, we are only filtering by status = 'available'
+    // In the future, you can build more complex WHERE clauses here based on query params
+    const whereClauses = ["v.status = 'available'"];
+    const queryParams: any[] = [];
+    let paramIndex = 1;
+
+    // Example: If you were to add a brand filter
+    // if (brand) {
+    //   whereClauses.push(`v.brand ILIKE $${paramIndex++}`);
+    //   queryParams.push(`%${brand}%`);
+    // }
+
+    const query = `
+      SELECT
+        v.*,
+        (
+          SELECT vi.image_url -- Assumes vehicle_images.image_url stores the full S3 URL
+          FROM dealership.vehicle_images vi
+          WHERE vi.vehicle_id = v.id
+          ORDER BY vi.is_primary DESC, vi.uploaded_at ASC -- Prioritize primary, then oldest uploaded
+          LIMIT 1
+        ) AS main_image_url
+      FROM dealership.vehicles v
+      WHERE ${whereClauses.join(' AND ')} -- Currently just "v.status = 'available'"
+      ORDER BY v.created_at DESC
+      LIMIT $${paramIndex++} OFFSET $${paramIndex++};
+    `;
+
+    // Add limit and offset to the query parameters *after* any filter params
+    const finalQueryParams = [...queryParams, numLimit, numOffset];
+
+    const result = await pool.query(query, finalQueryParams);
+
+    // Also fetch total count for pagination purposes (optional but good for UI)
+    const countQuery = `SELECT COUNT(*) FROM dealership.vehicles v WHERE ${whereClauses.join(' AND ')};`;
+    const countResult = await pool.query(countQuery, queryParams); // Use only filter params for count
+
+    const totalVehicles = parseInt(countResult.rows[0].count, 10);
+
+    res.json({
+      vehicles: result.rows,
+      totalVehicles: totalVehicles,
+      currentPage: Math.floor(numOffset / numLimit) + 1,
+      totalPages: Math.ceil(totalVehicles / numLimit),
+    });
+
+  } catch (error) {
+    console.error('Error fetching all vehicles:', error);
+    res.status(500).json({ message: 'Error fetching vehicles', error: (error as Error).message });
+  }
 };
 
 export const getVehicleById = async (req: Request, res: Response): Promise<void> => {
