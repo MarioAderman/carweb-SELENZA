@@ -106,14 +106,14 @@ const VehicleDetailPage: React.FC = () => {
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-5 gap-2">
               {vehicle.images.map((img: VehicleImage) => (
                 <button
-                  key={img.id}
+                  key={img.image_id}
                   onClick={() => setSelectedImage(img)}
                   className={`rounded overflow-hidden border-2 transition-all
-                    ${selectedImage?.id === img.id ? 'border-selenza-bright-red' : 'border-transparent hover:border-selenza-cool-gray'}`}
+                    ${selectedImage?.image_id === img.image_id ? 'border-selenza-bright-red' : 'border-transparent hover:border-selenza-cool-gray'}`}
                 >
                   <img
                     src={img.image_url}
-                    alt={`${vehicle.brand} ${vehicle.model} - Miniatura ${img.id}`}
+                    alt={`${vehicle.brand} ${vehicle.model} - Miniatura ${img.image_id}`}
                     className="w-full h-20 object-cover"
                     onError={(e) => (e.currentTarget.src = PlaceholderCarImage)}
                   />

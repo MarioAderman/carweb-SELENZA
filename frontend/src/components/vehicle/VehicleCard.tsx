@@ -32,7 +32,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle }) => {
 
   return (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out">
-      <Link to={`/vehicle/${vehicle.id}`} className="block">
+      <Link to={`/inventory/${vehicle.id}`} className="block">
         <div className="w-full h-56 bg-gray-200"> {/* Image container */}
           <img
             src={imageUrl}
